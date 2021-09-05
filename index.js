@@ -54,6 +54,14 @@ function brickPosition() {
   }
 }
 
+function reset() {
+  ball.dx = 5;
+  ball.dy = 5;
+  ball.color = "dodgerblue";
+  ball.x = 50;
+  ball.y = 50;
+}
+
 function ballPosition() {
   ball.x += ball.dx;
   ball.y += ball.dy;
@@ -65,11 +73,15 @@ function ballPosition() {
   if (ball.y + ball.radius > canvas.height) {
     ball.dy *= -1;
     score = 0;
-    ball.dx = ball.dx < 0 ? -5 : 5;
-    ball.dy = ball.dy < 0 ? -5 : 5;
-    ball.color = "dodgerblue";
+    reset();
   }
 
+  if (
+    (ball.x + ball.radius === brick.x - 10 && ball.y >= brick.y) ||
+    (ball.x - ball.radius === brick.x + brick.width + 10 && ball.y >= brick.y)
+  ) {
+    reset();
+  }
   if (ball.y - ball.radius < 0) {
     ball.dy *= -1;
   }
