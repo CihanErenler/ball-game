@@ -1,20 +1,24 @@
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
-const bounce = document.getElementById("bounce");
+const audio = document.getElementById("bounce");
 const bgMusic = document.getElementById("bg-music");
 const input = document.getElementById("user-name");
 const title = document.getElementById("title");
 const startGameBtn = document.getElementById("start-game");
 const startContainer = document.getElementById("start-container");
 const count = document.querySelector(".count");
+const gameOverContainer = document.getElementById("game-over-container");
+const newGame = document.getElementById("new-game");
 
 document.body.addEventListener("keydown", keyDown);
 document.body.addEventListener("keyup", keyUp);
 input.addEventListener("input", updateTitle);
 startGameBtn.addEventListener("click", startGame);
+newGame.addEventListener("click", update);
 
 //Global variables
 let playerName = "";
+let isDead = false;
 
 function updateTitle(e) {
   playerName = e.target.value;
@@ -102,14 +106,20 @@ function ballPosition() {
   if (ball.y + ball.radius > canvas.height) {
     ball.dy *= -1;
     score = 0;
+    audio.src = "death.wav";
+    audio.play();
     reset();
+    isDead = true;
   }
 
   if (
     (ball.x + ball.radius === brick.x - 10 && ball.y >= brick.y) ||
     (ball.x - ball.radius === brick.x + brick.width + 10 && ball.y >= brick.y)
   ) {
+    audio.src = "death.wav";
+    audio.play();
     reset();
+    isDead = true;
   }
   if (ball.y - ball.radius < 0) {
     ball.dy *= -1;
@@ -122,12 +132,15 @@ function ballPosition() {
   ) {
     ball.dy *= -1;
     score += 1;
-    bounce.play();
+    audio.src = "bounce.wav";
+    audio.play();
 
     if (score % 10 === 0) {
       ball.dx += ball.dx < 0 ? -1 : 1;
       ball.dy += ball.dy < 0 ? -1 : 1;
       ball.color = randomColor();
+      audio.src = "level-up.wav";
+      audio.play();
     }
   }
 }
@@ -170,6 +183,10 @@ function update() {
   drawScore();
   drawBall();
   drawBrick();
+  if (isDead) {
+    clear();
+    return;
+  }
   requestAnimationFrame(update);
 }
 
@@ -179,20 +196,22 @@ function startGame() {
   } else {
     startContainer.style.display = "none";
     count.style.display = "block";
-    
-    let countValue = 3;
-    count.textContent = countValue;
-    const countDown = setInterval(() => {
-      countValue -= 1;
-      count.textContent = countValue;
-      if (countValue === 0) {
-        clearInterval(countDown);
-        count.style.display = "none";
-        update();
-      }
-    }, 1000);
-    countDown;
+
+    countDown();
   }
 }
 
-function countDown() {}
+function countDown() {
+  let countValue = 3;
+  count.textContent = countValue;
+  const countDown = setInterval(() => {
+    countValue -= 1;
+    count.textContent = countValue;
+    if (countValue === 0) {
+      clearInterval(countDown);
+      count.style.display = "none";
+      update();
+    }
+  }, 1000);
+  countDown;
+}
