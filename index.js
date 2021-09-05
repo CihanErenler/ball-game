@@ -1,31 +1,56 @@
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
+const bounce = document.getElementById("bounce");
+const bgMusic = document.getElementById("bg-music");
+const input = document.getElementById("user-name");
+const title = document.getElementById("title");
+const startGameBtn = document.getElementById("start-game");
+const startContainer = document.getElementById("start-container");
+const count = document.querySelector(".count");
 
 document.body.addEventListener("keydown", keyDown);
 document.body.addEventListener("keyup", keyUp);
+input.addEventListener("input", updateTitle);
+startGameBtn.addEventListener("click", startGame);
+
+//Global variables
+let playerName = "";
+
+function updateTitle(e) {
+  playerName = e.target.value;
+
+  if (!e.target.value) {
+    playerName = "Player";
+  }
+  title.textContent = `Welcome ${playerName}`;
+}
 
 const full = Math.PI * 2;
 let score = 0;
+bgMusic.volume = 0.2;
 
+// Ball properties
 const ball = {
   x: 50,
   y: 50,
   radius: 15,
-  dx: 5,
-  dy: 5,
+  dx: 3,
+  dy: 3,
   color: "dodgerblue",
 };
 
+// Brick properties
 const brick = {
   x: canvas.width / 2 - 75,
-  y: canvas.height - 30,
+  y: canvas.height - 20,
   width: 150,
-  height: 20,
+  height: 15,
   dx: 0,
-  speed: 12,
+  speed: 5,
   color: "#333",
 };
 
+// Draw Ball
 function drawBall() {
   ctx.beginPath();
   ctx.arc(ball.x, ball.y, ball.radius, 0, full);
@@ -34,15 +59,18 @@ function drawBall() {
   ctx.closePath();
 }
 
+// Draw brick
 function drawBrick() {
   ctx.fillStyle = brick.color;
   ctx.fillRect(brick.x, brick.y, brick.width, brick.height);
 }
 
+// Clear the canvas
 function clear() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
+// Current crick position
 function brickPosition() {
   brick.x += brick.dx;
 
@@ -54,9 +82,10 @@ function brickPosition() {
   }
 }
 
+// Reset the game
 function reset() {
-  ball.dx = 5;
-  ball.dy = 5;
+  ball.dx = 2;
+  ball.dy = 2;
   ball.color = "dodgerblue";
   ball.x = 50;
   ball.y = 50;
@@ -89,14 +118,15 @@ function ballPosition() {
   if (
     ball.x >= brick.x - 10 &&
     ball.x <= brick.x + brick.width + 10 &&
-    ball.y + ball.radius > canvas.height - 30
+    ball.y + ball.radius > canvas.height - 20
   ) {
     ball.dy *= -1;
     score += 1;
+    bounce.play();
 
     if (score % 10 === 0) {
-      ball.dx += ball.dx < 0 ? -2 : 2;
-      ball.dy += ball.dy < 0 ? -2 : 2;
+      ball.dx += ball.dx < 0 ? -1 : 1;
+      ball.dy += ball.dy < 0 ? -1 : 1;
       ball.color = randomColor();
     }
   }
@@ -143,4 +173,26 @@ function update() {
   requestAnimationFrame(update);
 }
 
-update();
+function startGame() {
+  if (!input.value) {
+    input.classList.add("warning");
+  } else {
+    startContainer.style.display = "none";
+    count.style.display = "block";
+    
+    let countValue = 3;
+    count.textContent = countValue;
+    const countDown = setInterval(() => {
+      countValue -= 1;
+      count.textContent = countValue;
+      if (countValue === 0) {
+        clearInterval(countDown);
+        count.style.display = "none";
+        update();
+      }
+    }, 1000);
+    countDown;
+  }
+}
+
+function countDown() {}
