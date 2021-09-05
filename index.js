@@ -9,16 +9,27 @@ const startContainer = document.getElementById("start-container");
 const count = document.querySelector(".count");
 const gameOverContainer = document.getElementById("game-over-container");
 const newGame = document.getElementById("new-game");
+const displayScore = document.querySelector(".score");
+const userName = document.querySelector(".user-name");
 
 document.body.addEventListener("keydown", keyDown);
 document.body.addEventListener("keyup", keyUp);
 input.addEventListener("input", updateTitle);
 startGameBtn.addEventListener("click", startGame);
-newGame.addEventListener("click", update);
+newGame.addEventListener("click", startNewGame);
 
 //Global variables
 let playerName = "";
 let isDead = false;
+const full = Math.PI * 2;
+let score = 0;
+bgMusic.volume = 0.2;
+
+function startNewGame() {
+  isDead = false;
+  gameOverContainer.style.display = "none";
+  countDown();
+}
 
 function updateTitle(e) {
   playerName = e.target.value;
@@ -29,17 +40,13 @@ function updateTitle(e) {
   title.textContent = `Welcome ${playerName}`;
 }
 
-const full = Math.PI * 2;
-let score = 0;
-bgMusic.volume = 0.2;
-
 // Ball properties
 const ball = {
   x: 50,
   y: 50,
   radius: 15,
-  dx: 3,
-  dy: 3,
+  dx: 5,
+  dy: 5,
   color: "dodgerblue",
 };
 
@@ -88,8 +95,8 @@ function brickPosition() {
 
 // Reset the game
 function reset() {
-  ball.dx = 2;
-  ball.dy = 2;
+  ball.dx = 5;
+  ball.dy = 5;
   ball.color = "dodgerblue";
   ball.x = 50;
   ball.y = 50;
@@ -105,21 +112,14 @@ function ballPosition() {
 
   if (ball.y + ball.radius > canvas.height) {
     ball.dy *= -1;
-    score = 0;
-    audio.src = "death.wav";
-    audio.play();
-    reset();
-    isDead = true;
+    death();
   }
 
   if (
     (ball.x + ball.radius === brick.x - 10 && ball.y >= brick.y) ||
     (ball.x - ball.radius === brick.x + brick.width + 10 && ball.y >= brick.y)
   ) {
-    audio.src = "death.wav";
-    audio.play();
-    reset();
-    isDead = true;
+    death();
   }
   if (ball.y - ball.radius < 0) {
     ball.dy *= -1;
@@ -136,8 +136,8 @@ function ballPosition() {
     audio.play();
 
     if (score % 10 === 0) {
-      ball.dx += ball.dx < 0 ? -1 : 1;
-      ball.dy += ball.dy < 0 ? -1 : 1;
+      ball.dx += ball.dx < 0 ? -3 : 3;
+      ball.dy += ball.dy < 0 ? -3 : 3;
       ball.color = randomColor();
       audio.src = "level-up.wav";
       audio.play();
@@ -184,6 +184,7 @@ function update() {
   drawBall();
   drawBrick();
   if (isDead) {
+    gameOverContainer.style.display = "flex";
     clear();
     return;
   }
@@ -195,13 +196,12 @@ function startGame() {
     input.classList.add("warning");
   } else {
     startContainer.style.display = "none";
-    count.style.display = "block";
-
     countDown();
   }
 }
 
 function countDown() {
+  count.style.display = "block";
   let countValue = 3;
   count.textContent = countValue;
   const countDown = setInterval(() => {
@@ -214,4 +214,14 @@ function countDown() {
     }
   }, 1000);
   countDown;
+}
+
+function death() {
+  displayScore.textContent = score;
+  userName.textContent = playerName;
+  score = 0;
+  audio.src = "death.wav";
+  audio.play();
+  reset();
+  isDead = true;
 }

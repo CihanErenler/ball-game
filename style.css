@@ -102,12 +102,22 @@ body {
   display: none;
 }
 
-#game-over-container h4 {
+#game-over-container h4,
+h2 {
   color: #111;
   text-align: center;
-  font-size: 20px
+  font-size: 20px;
+  margin-top: 0;
+}
+h2 {
+  margin: 0;
+  font-weight: 400;
 }
 
 .score {
   color: dodgerblue;
+}
+
+.display {
+  display: flex !important;
 }
